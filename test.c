@@ -22,13 +22,14 @@
 
 int main(void)
 {
-    int sfd;
-    struct sockaddr_un my_addr;
+    int sfd, cfd;
+    socklen_t peer_addr_size;
+    struct sockaddr_un my_addr, peer_addr;
 
     sfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sfd == -1)
         handle_error("socket");
-
+    // bind locally through path
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sun_family = AF_UNIX;
     strncpy(my_addr.sun_path, MY_SOCK_PATH, sizeof(my_addr.sun_path) - 1);
@@ -41,3 +42,16 @@ int main(void)
         handle_error("listen");
         exit(EXIT_FAILURE);
     }
+    // handling incoming connections using accept
+    peer_addr_size = sizeof(peer_addr);
+    cfd = accept(sfd, (struct sockaddr *)&peer_addr, &peer_addr_size);
+    if (cfd == -1)
+        handle_error("accept");
+
+    // Dealing with socket errors
+    if (close(cfd) == -1)
+        handle_error("close");
+
+    if (unlink(MY_SOCK_PATH) == -1)
+        handle_error("unlink");
+}
