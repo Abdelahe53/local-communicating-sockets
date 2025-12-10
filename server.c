@@ -29,6 +29,8 @@ int main(void)
     sfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sfd == -1)
         handle_error("socket");
+
+	unlink(MY_SOCK_PATH);
     // bind locally through path
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sun_family = AF_UNIX;
